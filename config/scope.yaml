@@ -1,0 +1,15 @@
+allowed_targets:
+- 127.0.0.1
+- localhost
+- ::1
+- 127.0.0.0/8
+- scanme.nmap.org
+- zero.webappsecurity.com
+- 10.49.110.207
+- 192.168.1.12
+- 45.33.32.156
+- 54.82.22.214
+excluded_targets:
+- 127.0.0.99
+max_rate_per_sec: 50
+scan_window: 00:00-23:59

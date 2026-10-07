@@ -1,0 +1,26 @@
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Large test and dump files (>100MB fails GitHub push limit)
+test1.txt
+testt.txt
+
+# Local scan databases & generated PDF reports
+*.db
+scan_results.db
+reports/*.pdf
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
