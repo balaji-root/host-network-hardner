@@ -92,42 +92,42 @@ The scanning pipeline is orchestrated by `main.py` through sequential, decoupled
 
 ```mermaid
 flowchart TD
-    CLI["CLI Entrypoint\n(main.py)"] --> Phase1["Phase 1: Scope Validation\n(core/scope.py)"]
+    CLI["CLI Entrypoint<br/>(main.py)"] --> Phase1["Phase 1: Scope Validation<br/>(core/scope.py)"]
     
     subgraph ScopeGate ["Scope Enforcement Gate"]
-        ConfigYAML["config/scope.yaml\n(Allowed / Excluded Targets)"] --> Phase1
-        DB_Scope["SQLite Database\n(db.py / scan_results.db)"] --> Phase1
+        ConfigYAML["config/scope.yaml<br/>(Allowed & Excluded Targets)"] --> Phase1
+        DB_Scope["SQLite Database<br/>(db.py / scan_results.db)"] --> Phase1
     end
 
-    Phase1 -->|Target Authorized| Phase2["Phase 2: DNS & Reconnaissance\n(core/dns_resolve.py)"]
-    Phase1 -->|Target Unauthorized| Abort["Abort / Prompt Authorization"]
+    Phase1 -->|Authorized| Phase2["Phase 2: DNS & Reconnaissance<br/>(core/dns_resolve.py)"]
+    Phase1 -->|Unauthorized| Abort["Abort / Authorization Prompt"]
 
-    Phase2 -->|Resolved IP & Records| Phase3["Phase 3: Host Discovery\n(core/discovery.py)"]
+    Phase2 -->|Target IP & Records| Phase3["Phase 3: Host Discovery<br/>(core/discovery.py)"]
     
     subgraph DiscoveryAndRoute ["Discovery & Routing"]
         Phase3 --> HostLive{"Host Live?"}
         HostLive -->|No| ExitDown["Log Target Down & Exit"]
-        HostLive -->|Yes| HopTrace["Traceroute (if -A)\n(core/traceroute.py)"]
+        HostLive -->|Aggressive Scan| HopTrace["Traceroute Engine<br/>(core/traceroute.py)"]
     end
 
-    HopTrace --> Phase4["Phase 4: Async Port Scanner\n(core/scanner.py)"]
-    HostLive -->|Yes (Normal)| Phase4
+    HopTrace --> Phase4["Phase 4: Async Port Scanner<br/>(core/scanner.py)"]
+    HostLive -->|Standard Scan| Phase4
 
     subgraph ScanEngine ["Port Scan Engine"]
-        Phase4 --> TCP_Scan["TCP Connect Scanner\n(asyncio.Semaphore Concurrency)"]
-        Phase4 --> UDP_Scan["UDP Probe Engine\n(Top Common UDP Ports)"]
+        Phase4 --> TCP_Scan["TCP Connect Scanner<br/>(asyncio.Semaphore Concurrency)"]
+        Phase4 --> UDP_Scan["UDP Probe Engine<br/>(Top Common UDP Ports)"]
     end
 
-    TCP_Scan & UDP_Scan --> Phase5["Phase 5: Service Enumeration\n(core/enumerate.py)"]
+    TCP_Scan & UDP_Scan --> Phase5["Phase 5: Service Enumeration<br/>(core/enumerate.py)"]
 
     subgraph EnumerationPipeline ["Enumeration Pipeline"]
-        Phase5 --> ListenGreeting["Stage 1: Passive Greeting Listener\n(SSH, FTP, SMTP, MySQL)"]
-        ListenGreeting --> ActiveProbes["Stage 2: Active Protocol Handshakes\n(Redis, Postgres, Memcached)"]
-        ActiveProbes --> WebProbes["Stage 3: Universal HTTP/HTTPS Probe\n(Headers, Server Tokens, Titles)"]
+        Phase5 --> ListenGreeting["Stage 1: Passive Greeting Listener<br/>(SSH, FTP, SMTP, MySQL, VNC)"]
+        ListenGreeting --> ActiveProbes["Stage 2: Active Protocol Handshakes<br/>(Redis, Postgres, Memcached)"]
+        ActiveProbes --> WebProbes["Stage 3: Universal HTTP/HTTPS Probe<br/>(Headers, Server Tokens, Titles)"]
     end
 
-    WebProbes --> Phase6["Phase 6: OS Fingerprinting\n(core/os_fingerprint.py)"]
-    Phase6 --> Phase7["Phase 7: Pluggable Security Checks\n(core/checks/)"]
+    WebProbes --> Phase6["Phase 6: OS Fingerprinting<br/>(core/os_fingerprint.py)"]
+    Phase6 --> Phase7["Phase 7: Pluggable Security Checks<br/>(core/checks/)"]
 
     subgraph SecurityChecks ["CheckRunner Engine"]
         Phase7 --> Check_TLS["Weak TLS / SSL Check"]
@@ -139,8 +139,8 @@ flowchart TD
         Phase7 --> Check_CVE["Known CVE Signature Check"]
     end
 
-    SecurityChecks --> Persist["SQLite Storage\n(db.py -> scan_results.db)"]
-    Persist --> Report["Phase 8: ReportLab PDF Generator\n(core/reporter.py -> reports/*.pdf)"]
+    SecurityChecks --> Persist["SQLite Storage<br/>(db.py -> scan_results.db)"]
+    Persist --> Report["Phase 8: ReportLab PDF Generator<br/>(core/reporter.py -> reports/*.pdf)"]
     Report --> Summary["Terminal Scan Summary Table"]
 ```
 
